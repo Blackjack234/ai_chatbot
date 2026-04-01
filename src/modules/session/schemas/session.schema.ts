@@ -16,17 +16,24 @@ export class Message {
     timestamp: Date;
 }
 
-@Schema({versionKey:false,timestamps:true})
+@Schema({ versionKey: false, timestamps: true })
 
-export class Session{
-@Prop({required:true,unique:true})
-sessionId:string;
+export class Session {
+    @Prop({ required: true, unique: true })
+    sessionId: string;
 
-@Prop({default:'New Chat'})
-title:string;
+    @Prop({ default: 'New Chat' })
+    title: string;
 
-@Prop({type:[{role:String,content:String,timestamp:Date}],default:[]})
-messages:Message[];
+    @Prop({ type: [{ role: String, content: String, timestamp: Date }], default: [] })
+    messages: Message[];
+
+
+    @Prop({ default: 0 })
+    messageCount: number;       // ← new
+
+    @Prop({ default: 0 })
+    totalCharacters: number;
 }
 
 export const SessionSchema = SchemaFactory.createForClass(Session)

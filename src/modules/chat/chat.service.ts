@@ -14,7 +14,8 @@ export class ChatService {
             session = await this.sessionService.getSession(dto.sessionId);
             if (!session) throw new NotFoundException('session not found')
         } else {
-            session =await this.sessionService.createSession(dto.message)
+            const title = await this.geminiService.generateTitle(dto.message);
+            session = await this.sessionService.createSession(dto.message, title);
           
         }
 
@@ -23,7 +24,12 @@ export class ChatService {
             parts:[{text:msg.content}]
         }))
 
+        const start = Date.now()
+
         const reply = await this.geminiService.chat(history,dto.message)
+
+        const responseTimeMs = Date.now() - start;
+
 
 
         await this.sessionService.addMessage(session.sessionId,'user',dto.message);
@@ -32,7 +38,9 @@ export class ChatService {
         return  {
           sessionId:session.sessionId,
           reply,
-          messageCount:session.messages.length+2
+          responseTimeMs,
+          messageCount:session.messages.length+2,
+          totalCharacters: (session.totalCharacters ?? 0 ) + dto.message.length -reply.length
         }
     }
 

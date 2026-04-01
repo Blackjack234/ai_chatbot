@@ -13,10 +13,10 @@ export class SessionService {
     constructor(private readonly sessionRepository: SessionRepository, @InjectModel(Session.name) private readonly sessionModel: Model<SessionDocument>) { }
 
 
-    async createSession(firstMessage: string): Promise<SessionDocument> {
+    async createSession(firstMessage: string,title?:string): Promise<SessionDocument> {
         const session = new this.sessionModel({
             sessionId: uuidv4(),
-            title: firstMessage.slice(0, 50),
+            title: title ?? firstMessage.slice(0, 50),
             messages: []
         })
         return await session.save()
@@ -29,8 +29,16 @@ export class SessionService {
     async addMessage(sessionId: string, role: string, content: string) {
         return this.sessionModel.findOneAndUpdate(
             { sessionId },
-            { $push: { messages: { role, content, timestamp: new Date() } } },
-            { new: true }
+            {  
+                
+                $push: { messages: { role, content, timestamp: new Date() } },
+                $inc: {
+                    messageCount:1,
+                    totalCharacters:content.length
+                }
+        
+            },
+            { returnDocument:"after" }
         )
     }
 
